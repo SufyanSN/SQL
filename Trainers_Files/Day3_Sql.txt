@@ -1,0 +1,297 @@
+use fis2db
+--views
+select * from tbldepartment
+select * from tblemployee
+
+create view vWEmployeeByDept
+as
+select Empid,Empname,Salary,DeptName from tblemployee join tblDepartment on
+tblEmployee.Deptid=tblDepartment.Deptid
+
+select * from vWEmployeeByDept
+
+alter view vWITEmployees
+as select Empid,Empname,Salary,Gender,DeptName from tblemployee join tblDepartment on
+tblEmployee.Deptid=tblDepartment.Deptid where tblDepartment.DeptName='IT'
+
+select * from vWITEmployees
+
+insert into vWITEmployees values(110,'Banurekha',13000,'Female','Admin')
+
+insert into vWEmployeeByDept values(110,'Banurekha',13000,'Admin')
+
+create view vWSimple
+as select Empid,Empname,Salary,DeptId from tblemployee
+
+insert into vWSimple values(110,'Banurekha',13000,4,'007') -- unsuccessful due to constraint on phone
+
+update vWSimple set deptid=4 where empid=100  -- success
+
+
+select * from vWEmployeeByDept
+update vWEmployeeByDept set deptname='Sales' where empid=107
+delete from vWEmployeeByDept where empid=200
+
+insert into tblemployee values(200,'Banurekha','Female',13000,4,007)
+update tblEmployee set deptid=5 where empid=200
+
+--views with check option
+create table testview(ID int, Iname varchar(max))
+select * from testview
+insert into testview values(1,'A'),(2,'B'),(3,'C'),(4,'D'),(5,'E')
+
+--creating a view without check option
+create view vWTest
+as select ID,Iname from testview where ID<5
+
+select * from vWTest
+
+--perform dml operations
+insert into vWTest values(6,'F') -- insertion successful
+update vWTest set Iname='G' where ID=6 -- query successfully executed wo updating the 
+--base table, b'coz, this record is out of scope in the view
+delete from vWTest where ID=6 -- query successfully executed wo deleting the 
+--base table, b'coz, this record is out of scope in the view
+
+--view with check option
+alter view vWTest
+as select ID,Iname from testview where ID<5
+with check option
+
+--perform dml operations
+insert into vWTest values(0,'H') -- insertion successful
+update vWTest set Iname='G' where ID=6 -- query successfully executed wo updating the 
+--base table, b'coz, this record is out of scope in the view
+delete from vWTest where ID=6 -- query successfully executed wo deleting the 
+--base table, b'coz, this record is out of scope in the view
+
+--case
+--are of 2 types, simple case, searched case, 
+--else or no else
+create table casetable (Cis int, Cname varchar(10))
+insert into casetable values(1,'Red'),(2,'Blue'),(3,'Green'),(4,'Yellow')
+
+select * from casetable
+--simple case with no else
+select cis,cname,
+case cname
+    when 'Red' then 'It is Danger'
+	when 'Blue' then 'Primary'
+	when 'Green' then 'Success'
+ end as Colors
+ from casetable
+
+ --simple case with else
+select cis,cname,
+case cname
+    when 'Red' then 'It is Danger'
+	when 'Blue' then 'Primary'
+	when 'Green' then 'Success'
+	else 'Alert'
+ end as Colors
+ from casetable
+
+ --searched case w/o else
+ select cis, cname,
+ case 
+    when cname='Red' then 'Danger'
+	when cname='Blue' then 'Primary'
+	when cname='Green' then 'Success'
+end  'Color Descriptions' from casetable
+
+--nested case : in if else clause
+declare @salesmade int,@sal int
+set @salesmade=1
+select @salesmade as 'Total Sales'
+print 'The total sales made is' + ' '+cast(@salesmade as varchar(10))
+select @sal=salary from tblemployee where empid=200
+print 'Employee Banurekha''s Salary is' + cast(@sal as varchar(10))
+if @salesmade>500
+ select 'Bumper Sales'
+else
+ begin
+--print case
+ select case
+    when @salesmade between 0 and 100 then 'Poor Sales'
+	when @salesmade between 101 and 200 then 'OK sales'
+	when @salesmade between 201 and 300 then 'Good sales'
+	else 'No Sales At all'
+  end as 'Sales Details'
+  --end
+ end
+
+ --case within case
+ declare @totalsales int
+ set @totalsales=350
+ select case 
+   when @totalsales>=500 then 'Bumper Sales'
+   when @totalsales<500 then
+    case 
+	  when @totalsales between 0 and 100 then 'Poor Sales'
+	  when @totalsales between 101 and 200 then 'OK sales'
+	  when @totalsales between 201 and 300 then 'Good sales'
+	  when @totalsales between 301 and 500 then 'Very Good Sales'
+	  else 'No Sales At all'
+	end
+  end as 'Sales Details'
+	
+--cast
+select 1+'2'
+select 1+2
+select 1+'a'
+
+select 1 + cast('a' as int)
+
+select cast('05-09-2022' as datetime)
+select cast('Hello World' as datetime)
+
+--isnull() -- takes 2 parameters. first parameter on evaluation to null is replaced by the second parmeter
+select empname, phone from tblemployee
+select * from tblemployee
+select empname,isnull(Phone,100007) from tblemployee
+
+update tblEmployee set phone=isnull(Phone,100007)
+insert into tblemployee values(201,isnull(null,'FIS'),'Others',15000,5,1122334455)
+
+--coalesce() 
+/* Used to handle null values in data records. It evaluates a set of parameters and returns
+the first non-null value
+-can run 2 or more queries as a single query
+-shortcut alternate to case 
+-Since Coalesce is an expression by itself, it can be used in any statement or clause that
+accepts expressions viz. select,where, having
+*/
+
+select coalesce(null,null,null,24,null,45,null)
+
+alter table testview add fname varchar(30)
+select * from testview
+update testview set fname='Varma' where Id=3
+
+select id,iname,fname,coalesce(fname,iname) as 'Fullname' from testview
+
+--the above when written using case
+select id, iname,fname,
+case
+   when fname is not null then fname
+   when fname is null then iname
+   else null
+end as Fullname from testview
+
+--example
+select id,iname,fname,coalesce(id,fname,iname)as 'New Name' from testview
+
+select id,iname,fname,coalesce(fname,convert(varchar(10),id),iname)as 'New Name' from testview
+
+select id,iname,fname,coalesce(fname,cast(id as varchar(5)),iname)as 'New Name' from testview
+
+alter table sampletable  add hourly_rate int
+
+update sampletable set hourly_rate=20 where sampleid =11 or sampleid=13
+
+select * from sampletable
+--simple coalesce
+select sampleid,sname,hourly_rate,coalesce(salary,hourly_rate*12+100) as Compensation from sampletable
+
+select sampleid,sname,coalesce(salary,(hourly_rate*12+100) *
+coalesce(commission,10))as Compensation from sampletable
+
+select isnull(null,null)
+select coalesce(null,null,null,null)
+
+declare @c char(1)  -- declared a type but not assigning any value
+--set @c='a'
+select coalesce(null,null,null,@c)
+
+--multiple isnulls
+select isnull(null,isnull(null,5)) as 'new value'
+
+--coalesce in concatenation
+select iname + ' ' +coalesce(fname,'Mr/Ms. ')+ ' ' as Fullname from testview
+
+--union and union all
+create table table2(Tid int identity,
+Tname varchar(30),Grade char(1),Percent_age int)
+
+insert into table2 values('Hamza','B',60),('Vinamr','A',80),('Vinuthna','B',70),
+('Meghana','C',45)
+
+select * from table1
+select * from table2
+
+select Tname,grade,percent_age from table1
+union 
+select Tname,grade,percent_age from table2
+
+--intersect
+create table sample1(Id int identity, Ename varchar(20),Age int, city varchar(20))
+
+create table sample2(Bonusid int, Id int, bonusamount float)
+
+insert into sample1 values('John',25,'Seatle'),('Ben',26,'NY'),('Robert',25,'Chicago')
+
+insert into sample2 values(200,1,25000),(202,3,20000)
+
+select * from sample1
+select * from sample2
+
+select sample1.Id,ename,sample2.bonusamount from sample1 left join sample2 on sample1.Id=sample2.Id
+intersect
+select sample1.Id,ename,sample2.bonusamount from sample1 right join sample2 on sample1.Id=sample2.Id
+
+select sample1.Id,ename,sample2.bonusamount from sample1 left join sample2 on sample1.Id=sample2.Id
+except
+select sample1.Id,ename,sample2.bonusamount from sample1 right join sample2 on sample1.Id=sample2.Id
+
+--rank() - ranks the rows based on the data
+create table Marks(stdname varchar(20),sub_ject varchar(10), marks int)
+
+insert into Marks values('Meher','Maths', 80),('Meher','Science',70),('Meher','English',65)
+insert into Marks values('Vaishali','Maths', 68),('Vaishali','Science',85),('Vaishali','English',90)
+insert into Marks values('Dhruv','Maths', 60),('Dhruv','Science',90),('Dhruv','English',64)
+
+select * from Marks
+update marks set marks =65 where sub_ject='English' and stdname='Paresh'
+--query using row_number()
+select stdname,sub_ject,marks,ROW_NUMBER()over(order by marks desc)Ranking from Marks
+
+--query using rank()
+select stdname,sub_ject,marks,rank()over(order by marks desc)Ranking from Marks
+
+--query using dense_rank()
+select stdname,sub_ject,marks,dense_rank()over(order by marks desc)Ranking from Marks
+
+--rank with partition
+select stdname,sub_ject,marks,Rank()over(partition by sub_ject order by marks desc)Ranking from Marks
+
+select stdname,sub_ject,marks,dense_Rank()over(partition by sub_ject order by marks desc)Ranking from Marks
+
+--pivoting
+--rows to columns
+select stdname,Maths,Science,English    -- section 1
+from
+(select stdname,sub_ject,marks from marks) as PivotData  --section 2- actual data
+pivot
+(
+sum(marks)for sub_ject in(Maths,Science,English))as pivottable
+order by Maths
+
+--create a table called as Customers with Custname, Productname,Amount as below and pivot the products
+/*Johnson,Laptop,45000
+Pamela, Desktop, 25000
+Johnson, Desktop, 54000
+David, Desktop, 21000
+Jane Laptop 56000*/
+
+--unpivot (converting columns into rows)
+create table Medals(Playername varchar(30),Gold int, Silver int, Bronze int)
+insert into Medals values('Francis', 20,43,58),('Zaid',24,65,38),('Raja',30,50,35)
+
+select * from Medals
+
+select playername,Medals,Total
+from
+(
+select playername,Gold,silver,bronze from medals)as actualdata
+unpivot
+(Total for Medals in(Gold,Silver,Bronze))as unpivotdata

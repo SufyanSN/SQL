@@ -1,0 +1,175 @@
+OLAP : Online Analytical Processing. Is a category of software tools that provides analysis of data for business decision. OLAP allows to analyze information from multiple databases
+
+Examples : Sales Figures comparable between
+   months/countries/zones/regions/cities/branches/salesmanwise
+Amazon analyse customers purchase patterns and recommending products on those lines.
+
+note : The primary objective is data analysis and not data processing
+
+OLTP : Online Transaction Processing. Is is service that supports day to day transactions, and also administers the transactions of an organization
+
+A - Atomicity
+C - Concurrency/Consistency
+I - Isolation
+D - Durability
+
+Examples : ATM validations, Card/Pin/OTP/2 way authentication/Transactions
+note : The primary objective of OLTP is data processing and not analysis
+
+OLAP creates a single platform for all types of business analysis, which includes Planning,budgeting, forecasting and analysis, while OLTP is useful for daily transaction management 
+
+OLAP is characterised by large volumes of data, while OLTP is characterised by large number of online transactions
+
+OLAP uses uniquely created datawarehouse, which can integrate with different data sources, while OLTP uses traditional database
+
+Drawbacks/Challenges : Implementation and maintenance are dependent on the IT professionals, since OLAP tools need a complicated modelling procedures.
+OLAP tools need co-operation between people of various departments to be effective, which may not be always possible
+
+Drawbacks/Challenges : If OLTP systems face hardware failures, then online transactions get affected severly. OLTP systems allow multiple users to access, to change the same data at the same time can sometime lead to unprecedented situations
+
+Transactions : Is a Unit of Execution
+      Database Transactions consists of
+    - DML
+    - One DDl
+    - One DCL
+begins when the first transaction statement is executed, and ends when any one of the following occurs 
+      1. Rollback/Commit
+      2. Autocommit
+      3. User Exits
+      4. System Crashes
+
+Fact Table : Stores all quantitative information for analysis, and is often denormalised. It consists of 2 types of columns. The foreign key column that connects to the dimension table, and the other is measure column that contains the data that is being analysed
+
+
+Dimension Table : Stores data about the ways in which the data in the fact table can be analysed
+
+Eg : Fact - Product Sales
+
+Time Info.		Products		Customer		Units Sold
+8.00               1                  4                 15
+8.00               3                  2                  5
+9.14               1                  1                 20
+9.23               2                  4                 7 
+
+Dimension Table
+
+1. Customer Centric
+2. Product centric
+3. Time Centric
+4. Region Specific
+5. Quantity analysis
+
+Various OLAP Systems:
+ 1. HOLAP - Hybrid OLAP
+ 2. MOLAP - Multidimensinal OLAP
+ 3. ROALP - Relational OLAP 
+
+The process of moving from finer granular data to a coarser data is called as Roll Up, and the opposite is called drill down
+
+Star Schema 					vs				Snowflake Schema
+
+1 Fact and Dimensions tables     						Fact, Dimensions, and Sub Dimensions tables
+Top-Down Model									Bottom Up Model
+Uses More Space									Uses Less Space
+Normalization is not used							Normalized and Un normalised data is used
+Design is Simple									Design is complex
+Takes Less time for Query Execution						Takes more time for Query Execution
+Query Complexity is less							Query Complexity is high
+Understanding is easy								Undestranding is difficult
+Less no. of Foreign Keys							More no. of Foreign keys
+Data Redundancy is high								Data Redundancy is low
+
+Galaxy Schema : Based on hierarchy levels, more than one fact table, seperate dimensions are possible. Can be built by splitting star into multiple stars. Useful in aggregating the fact tables
+
+Hierarchial queries : Are a form of recursive query to retrieve hierarchy data (eg Organization data-employee reporting to ?)family tree
+
+-If we are using IMS database(IBMs Information Management System), then there is no need for Hierarchial Queries. If using other commercial databases, then we need to write h-queries for hierarchial data
+
+There are 3 types of H-Query Syntax
+ 1. Connect By - Oracle,DB2,Informix,PostgreSql
+ 2. CTE - MS SQL server 
+ 3. ANSI SQL
+
+CTE : used to simplify complex joins and subqueries. Used to query the hierarchial data. They are used to generate a named set(temporary table).
+Exists only for the duration of the query. It should always be followed by select,insert,update,delete
+
+Views 						vs					Materialized Views
+-Only Sql Query definitions are stored in the database		Sql Query along with the data is stored in DB
+-No StorageRequired								Data is Stored within the view
+-Latest Data is returned everytime on query				Data is not up to date, and needs periodic refreshing
+-Performance : Same as that of the base table				Performance is Usually faster than views
+-No indexes, uses the base table indexes only				Can create index on materialized views	
+
+Table Partitioning :Dividing the table into simpler,smaller data
+
+Benefits : 
+ 1. Performance Improvements
+ 2. Increases the Availability
+ 3. Helps in storage cost optimization
+ 4. Managing Data becomes easier
+
+When to Partition :
+ 1. Table size > 2 GB	
+ 2. History data coexists with latest data
+ 3. Distribute data across various devices
+ 4. Table performance is going down		
+
+Types of Partitioning:
+1. range partition
+2. list partition
+3. hash partition
+
+create table products(pid numeric,price numeric) partition by range(price)
+(partition p1 values less than(2000),
+partition p2 values between 2001 and 5000
+pARTITIOn p3 less than(maxvalue))
+
+insert into products values(100,3400) -- inserted in p2 partition
+select * from products partition(p2)
+
+partition by list(state)
+partitin by hash(empid) partition 25
+
+--materialized views
+create view matviews with schemabinding
+as
+select e.empid,e.empname,e.salary,d.deptid,d.deptname from
+dbo.tblemployee e join dbo.tbldepartment d on e.deptid=d.deptid
+
+select * from matviews
+
+create unique clustered index matindex on dbo.matviews(deptid,empid)
+
+/* in oracle with one example
+create materialized view dept_empl
+refresh complete
+as select d1.deptid,d1.deptname,count(e1.*)as Employee_Count,sum(e1.salary)as TotalSalary
+from tbldepartment d1 join tblemployee e1 on d1.deptid=e1.deptid
+group by d1.deptid,d1.deptname;*/
+
+alter database fis2db
+add filegroup prods_3
+
+
+select name from sys.filegroups 
+alter database fis2db
+add file (name=prods_1,filename='c:\windows\fis-2-sql\orders_2020.ndf',
+size=10 mb,
+maxsize=unlimited,
+filegrowth=1024 kb)to filegroup prods_1
+
+
+create partition function orders_bydate(date) as range left
+for values('2020-12-31','2021-12-31')
+
+create partition scheme orders_byyear_schema
+as partition orders_bydate to ([prods_1],[prods_2],[prods_3])
+
+create table sales_orders(
+order_date date,
+productname varchar(255),
+amount decimal(10,2)not null default 0,
+primary key(order_date,productname))
+on orders_byyear_schema(order_date)
+
+insert into sales_orders values('2020-08-12','iPhone',121000)

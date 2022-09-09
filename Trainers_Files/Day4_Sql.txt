@@ -1,0 +1,136 @@
+--RollUp operator: is an extension to group by clause. Helps in calculating sub totals and grand totals for
+-- a set of columns passed to the group by Roll up clause. 
+--Generates results in a hierarchial manner
+
+--Cube Operator : Generates  aggregated results that contain all possible combinations for the selected columns
+
+insert into tblemployee values(300,'SampleData','Others',15000,null,90807060)
+select * from tblemployee
+select deptid, sum(salary) from tblemployee group by deptid
+
+--grand total of the total salary
+select deptid as Departments, sum(salary) as Total from tblEmployee
+group by rollup(deptid)
+
+select coalesce(deptid,100)as Departments, sum(salary) as Total from tblEmployee
+group by rollup(deptid)
+
+--sum of employees salaries by dept, gender wise subtotals and grand total
+
+select * from tblemployee order by deptid
+
+select coalesce(deptid, 100)as Departments, coalesce(gender,'Gender Subtotals')as Gender,
+sum(salary) as 'Total Salary' from tblemployee
+group by rollup(deptid,gender)
+
+--w/o coalesce
+select deptid as Departments,gender as Gender,sum(salary)as Total from tblemployee
+group by rollup(deptid,gender)
+
+--w/o rollup and coalesce
+select deptid,gender,sum(salary)as Total from tblemployee
+group by deptid,gender
+order by deptid
+
+--write the above with coalesce (deptid 100), (gender,allgender)
+
+--Cube Operator
+/*1. Salary grouped by both dept and gender
+2. salry grouped by gender alone
+3. Salary grouped by dept alone
+4. grand total of all salary
+ */
+select coalesce(deptid, 100)as Departments, coalesce(gender,'Gender Subtotals')as Gender,
+sum(salary) as 'Total Salary' from tblemployee
+group by cube(deptid,gender)
+order by deptid,gender
+
+--Hierarchial Queries
+select sub.empno as 'Subordinate Employee Number',sub.ename as 'Subordinate  Name', 
+sup.empno as 'SupervisorEmployeeId', sup.ename as 'Supervisor Name'
+from emp sub join emp sup on sub.mgr_id=sup.empno
+order by SupervisorEmployeeId
+
+--with CTE (common table expression)
+with mycte (empno,ename,mgr_id,empLevel)
+as (select empno,ename,mgr_id, 1 empLevel  
+from emp where mgr_id is null                    --initial query
+union all
+select e.empno,e.ename,e.mgr_id, mct.empLevel + 1  --recursive query
+from emp e inner join mycte mct on e.mgr_id=mct.empno
+where e.mgr_id is not null)
+select * from mycte 
+order by empLevel
+
+--example 2
+create table Htable(lvl hierarchyid not null,
+loc nvarchar(30) not null,
+loctype nvarchar(10) )
+
+--insert data into the above table
+insert into Htable values
+('/1/','Europe','Continent'),
+('/2/','South America','Continent'),
+('/1/1/', 'France','Country'),
+('/1/1/1/','Paris','City'),
+('/1/2/1/','Madrid','City'),
+('/1/2/','Spain','Country'),
+('/3/','Asia','Continent'),
+('/2/1/','Brazil','Country'),
+('/2/1/1/','Brasilia','City'),
+('/2/1/2/','Bahia','State'),
+('/3/1/','Delhi','City'),
+('/2/1/2/1/','Salvador','City')
+
+select * from Htable
+select cast(lvl as nvarchar(100))as 'Hierarchy Level',loc,loctype from Htable
+order by lvl
+
+--Tree structured queries
+Create table Mytree
+(MID int primary key,
+Mname varchar(30),
+ParentId int foreign key references Mytree(MID))
+
+insert into Mytree select 1,'grandpa',null
+union all select 2,'dad',1
+union all select 3,'me',2
+union all select 4, 'mom',1
+union all select 5,'grandma',null
+union all select 6,'sibling',2
+
+select * from Mytree;
+
+--HQ using the above tree structure
+with family as
+(select MID,Mname,ParentId,lvl=0
+from Mytree where ParentId is null 
+union all
+select t.MID,t.Mname,t.ParentId,lvl=family.lvl+1
+from family inner join MyTree t on t.parentid=family.MID)
+select MID,Mname,Parentid,lvl from family 
+order by lvl
+
+
+use Northwind
+
+select * from customers;
+
+--eg 1 cte
+with cte1 as(select orderId,avg(unitprice) as 'Average_Price' from [Order Details]
+group by OrderID)
+select od.orderid,od.quantity,cte1.Average_Price from [Order Details]od join cte1 on
+od.OrderID=cte1.OrderID
+
+--select cte1.Average_price from cte1
+--eg 2 cte
+with customers_in_usa as(
+select customerid,contactname,city from customers where country='USA')
+select contactname,city from customers_in_usa where city in('Eugene','Portland','Walla Walla')
+
+--eg multiple cte
+with cust_in_USA as(select customerid,contactname,city from customers where country='USA'),
+specific_city as(select contactname,city from cust_in_usa where city in('Eugene','Portland','Walla Walla'))
+select a.customerid,a.contactname,sc.city from cust_in_USA a, specific_city sc
+where a.ContactName=sc.ContactName
+order by a.ContactName

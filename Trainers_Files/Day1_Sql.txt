@@ -1,0 +1,185 @@
+create database FIS2DB
+
+use Fis2DB
+
+create table tblDepartment(
+Deptid int primary key,
+DeptName varchar(20)not null,
+DeptLocation nvarchar(30)
+)
+create table tblEmployee
+(Empid int primary key,
+Empname varchar(30),
+Gender char(7),
+Salary float,
+Deptid int references tblDepartment(Deptid)  --foreign key declaration /*  */
+)
+sp_help tbldepartment
+sp_help tblemployee
+
+select * from tblDepartment
+select * from tblemployee
+
+insert into tblDepartment(Deptid,DeptName) values(1,'IT')
+insert into tblDepartment values(5,null,'Bangalore') --trying to insert null in a non null column
+insert into tblDepartment values(3,'Sales','Mumbai'),(4,'Admin','Chennai')
+
+insert into tblEmployee values(103,'Ashwini D','Female',12200,2),
+(104,'Pooja','Female',12400,1),(102,'Tanishq','Male',12300,1),
+(101,'Pardha','Male',12500,3)
+--altering table and adding a column
+alter table tblemployee
+add Phone varchar(15)  -- Thru alter, cannot associate constraints when the table is already having data 
+
+update tblEmployee set Phone = '44444444444' where empid=104
+
+--alter table and add a constraint
+alter table tblemployee
+add constraint unqphone unique(Phone)
+
+insert into tblemployee values(105,'Syed','Male',12500,2,555555)
+
+
+--altering table and adding a column
+alter table tblemployee
+add Phone varchar(15)  -- Thru alter, cannot associate constraints when the table is already having data 
+
+--dropping a column from a table
+alter table tblemployee
+add Email varchar(30)
+
+alter table tblemployee
+drop column Email
+
+update tblEmployee set Phone = '44444444444' where empid=104
+
+update tblDepartment set DeptLocation='Pune' where deptname='HR'
+
+--alter table and add a constraint
+alter table tblemployee
+add constraint unqphone unique(Phone)
+
+insert into tblemployee values(108,'Anjali','Female',12600,3,'888777')
+
+--drop a constraint
+alter table tblemployee
+drop constraint unqphone
+
+--check constraint
+alter table tblemployee
+add constraint salarychk check(Salary>=12000)
+
+--default constraint
+alter table tbldepartment
+add constraint deflocation default 'Hyderabad' for deptlocation
+
+insert into tblDepartment(Deptid,DeptName) values(5,'Operations')
+
+--Enabling or disabling a constraint
+alter table tblemployee
+nocheck constraint salarychk  -- disable
+
+alter table tblemployee
+check constraint salarychk  -- enabling
+
+--dropping a table
+-- syntax drop <object> <object name>
+--drop table <tablename>
+
+--Truncate 
+--truncate table <tablename>
+
+create table dummytable
+(dummyid int identity(1,2), -- takes a seed and an increment value and automatically assigns vales to the column
+dummyname varchar(20),
+dummycity varchar(20))
+
+select * from dummytable
+
+sp_help dummytable
+insert into dummytable values('newdata','Delhi'),('gfghhj','dfgh'),('aaa','bbb')
+truncate table dummytable  -- deletes all records but retains the table structure with all constraints as it is
+
+drop table dummytable  -- drops the object from the database schema itself
+
+delete from dummytable 
+
+--setting the implicit transactions off
+set implicit_transactions off
+
+begin transaction
+ select * from dummytable
+ delete from dummytable
+ select * from dummytable
+  commit
+
+ select * from dummytable
+
+--column level or table level constraint
+ /* column level
+ create table orders
+ (orderid int primary key,
+ orderdate date not null,
+ orderamount int check(orderamount>500),
+ Customerid int foreign key references  Customers(Custid)
+ 
+ table level
+
+ create table orders(orderid int,
+ orderdate datetime not null,
+ customerid int,
+ orderamount int,
+ primary key(orderid),
+ constraint fkconst foreign key (customerid) references Customers(Custid),
+ constraint ordamtchk check(orderamount >500)
+ ) 
+ */
+ --selection and projection
+ select Empid,Empname,Salary from tblEmployee
+ where deptid=3
+
+ --alias names to columns
+ select empid as EmployeeId, empname EmployeeName,salary 'Employee Salary'
+ from tblEmployee
+
+ --top few records
+ select top 3 * from tblEmployee
+
+ --top percentage of records
+ select top 2 percent * from tblemployee
+
+ --Relational Operators (<,>,<=,>=,=,!=,<>)
+ select * from tblemployee where salary<>12500
+  select * from tblemployee where salary<12500
+
+  select * from tblemployee where salary>=12400 and salary <=12600
+
+  --between operator can replace the above query
+  select * from tblemployee where salary between 12400 and 12600
+
+  --negative operators
+   select * from tblemployee where salary not between 12400 and 12600
+
+--null values
+select * from tblEmployee where deptid is null
+ select * from tblemployee where deptid is not null
+
+ --logical operator or
+ select * from tblEmployee where deptid =2 or deptid=3
+
+ --the above can also be done with in operator
+  select * from tblemployee where deptid in(2,3)
+  select * from tblemployee where deptid not in(2,3) or deptid is null
+
+--Arithmetic  (+,-,*,/,%)
+select empname,deptid,salary,salary+1000 as 'New Salary' from tblEmployee
+select empname,salary,salary*12 as 'Annual salary' from tblEmployee
+update tblemployee set salary=(salary+200) where salary<12200
+
+--Aggregate Functions
+select avg(salary) from tblemployee
+select sum(salary) from tblEmployee
+select min(salary)as 'Minimum Salary',max(salary) 'Maximum Salary' from tblemployee
+select max(salary) from tblEmployee
+
+select count(empid) from tblemployee

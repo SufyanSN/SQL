@@ -1,0 +1,36 @@
+Indexes : An ability of the DBMS to arrange data in a logical manner for faster retrieval. Indexes sort the data permanently
+
+are of 2 types
+ 1. Clustered Index: which sorts the data physically every time a dml operation is performed
+                     can have only one clustered index/per table
+                     automatically gets created whenever a primary key column is defined for a table
+			   can be either unique on non unique, when there is no primary key defined for a table
+
+ 2. Non clustered Index : does not sort the original datain the table, instead creates an index table and sorts the data there
+                          can have many non clustered index/s per table
+                          allows duplicates
+  - Unique Non clustered : does not allow duplicates
+
+Group By clause
+
+Select
+from
+where
+group by
+having
+order by
+
+where 					vs				having
+used to restrict no. of rows				     used to restrict no.of groups
+works before formation of group				having works after formation of group
+
+Subqueries : They are super sets of Joins
+ 1. Are queries within query (inner query)
+ 2. Enclose subqueries in paranthese
+ 3. Place subqueries on the right side of the comparison condition
+ 4. Use Single row subquery with single row operators and multi row subquery with multi row operators
+
+When an inner query returns one row of data, then it is single row, else if it returns more than one then, it is known as multirow subquery
+
+Single row operators (all relational operators are single row <,>,<>,=,<=,>=)
+Multi row operators (any,all,in) can be used along with the single row operator

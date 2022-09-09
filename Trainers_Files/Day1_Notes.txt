@@ -1,0 +1,95 @@
+Database: Can be defined as the storage of inter related data that has been organised in such a fashion that the process of retrieving data is effective and efficient
+
+Management System : A set of programs to store/access data
+
+- An environment that is both convinient and efficient to use.
+
+DBMS : why? 
+
+Drawbacks of file system to store Data: 
+  Data Redundancy 
+  Inconsistency
+  Difficulty in accessing data
+  Data Isolation
+  Integrity Problems
+  Security
+  Concurrent Usage
+
+Dbase III, IV, Foxbase
+Access
+
+Data Modelling : A collection of tools for describing
+  - Data
+  - Data Relationship
+  - Data Semantics
+  - Data Constraints
+Types
+ HDBMS - Hierarchial Database Management System
+ NDBMS - Network Database MS
+ RDBMS - Relational Database Management System
+ ORDBMS - Object Relational MS
+   -Multimedia
+   -Hypertext based
+
+Architecture : 3 level
+ Physical  -  Real Data stored as bits and bytes
+ Conceptual/Logical - Database Designer/developers view
+ Application - End users view
+
+
+RDBMS : The relational models sorts data into tables/relations, each consisting of Columns and Rows. Columns represents attributes and rows data
+
+Entity : is comparable to an object of high level language
+Attributes : are descriptive features of an entity(properties)
+
+Jargons:
+Relation : table/s
+Tuple : a row of data
+Attribute : column/s of table
+Degree : no.of attributes in a table
+Cardinality : number of tuples
+
+EF Codd : laid down 12 golden rules
+
+Chen : Enity relational diagram (E-R diagram)
+
+Relationships : are of 3 types
+     1. one to one 
+     2. one to many
+     3. many to many
+
+Null : is missing information, unknown 
+Constraints : Broadly we have 3 type of constraints
+1. Domain Integrity : Null,Not null, default, Check, unique ( can have one null and zero duplicates)
+2. Entity Integrity : Primary Key (cannot have duplicates/null values)
+3. Referential Integrity : Constraint enforced between 2 relations where one is dependent on the other for its data : Foreign Key (Always looks up the Primary key. Foreign Keys can have duplicate values and also null)
+
+SQL Basics: Struture Query Lang
+1. DDL - Data Definition lang(Create,Alter, Drop,Truncate,Rename )
+2. DML - Data Manipulation Lang(Insert, Update, Delete )
+3. DQL - Data Query Lang ( Select )
+4. TCL - Transaction Control lang (Commit, Rollback )
+5. DCL - Data Control Lang (Grant , Revoke )
+
+Database Schema : Is one that contains all relevant objects
+
+
+   Truncate                   vs           				    Delete
+1. DDL command					      		      DML command
+2. Cannot restrict no.of rows deleted		 			Can restrict no.of rows to be deleted
+3. Cannot revert /undo truncate						Can revert using rollback
+4. Faster										Slower than Truncate
+5. Retains the structure							Retains the structure
+
+
+RDBMS is based on Relational Algebra/set Theory
+
+Selection/Restriction  - where 
+Projection - specifying the column list
+Join
+Difference
+Divide
+Union
+
+
+

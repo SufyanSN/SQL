@@ -1,0 +1,219 @@
+select * from tblemployee
+
+insert into tblemployee values(109,'Neha','Female',12500,4,1234567)
+
+select count(deptid) from tblemployee  --excludes null
+select count(*)deptid from tblemployee  -- includes null
+
+select distinct(deptid) from tblemployee --excludes duplicates
+
+select distinct(salary) from tblemployee
+
+--find all employees who earn more than the average salary of all employees
+select avg(salary) from tblemployee
+
+select * from tblemployee
+where salary >12361   -- legal query
+
+select * from tblemployee
+where salary >avg(salary)  --illegal as functions cannot be used in the RHS of the where clause
+
+--pattern matching
+--wild card characters used with like operator
+--1. % (substitutes 0,1 or more characters)
+--2. _ (substitutes exactly one character)
+--3. [] (substitutes one character in the given range -either or)
+--4. ^ (negation, not in the given list/range)
+
+select * from tblemployee where empname like 'p%'
+select * from tblemployee where empname like 'p%a'
+
+select * from tblemployee where empname like '_a%'
+
+select * from tblemployee where empname like '%a%'
+select * from tblemployee where empname like '%r'
+select * from tblemployee where empname like 'p_[oyr]%'
+
+select * from tblemployee where phone like '%1'
+select * from tblemployee where empname like '__h%'
+select * from tblemployee where empname like 'a[sne]%'
+
+select * from tblemployee where empname like '%[^h]%'
+select * from tblemployee where empname like '__[^h]%'
+
+select * from tblEmployee where empname like '[^ap]%'
+
+select Empid, Salary from tblemployee where empname like '[^ap]%'
+
+sp_help tblemployee
+
+select * from tblEmployee
+order by empname desc
+
+select * from tblEmployee order by gender ,salary desc
+
+--can sort the data on multiple columns
+--can sort on an alias column
+--can sort on a column that is not included in the select list
+
+select Empid,Empname from tblEmployee order by salary desc
+
+select Empid,Empname,Salary as EmployeeSalary from tblemployee
+order by EmployeeSalary
+
+--understanding indexes
+drop table sampletable
+create table sampletable
+(sampleid int,
+sname varchar(30),
+age int,
+city varchar(25))
+
+sp_help sampletable
+
+create index idxsid on sampletable(sampleid)
+
+insert into sampletable values(13,'hh',21,'Mumbai'),(11,'bb',23,'Bangalore'),
+(15,'cc',22,'Chennai'),(12,'dd',24,'Delhi'),(10,'ee',25,'Pune')
+
+select * from sampletable
+
+--dropping an index
+drop index sampletable.idxsid
+
+create clustered index idxclsid on sampletable(sampleid)
+drop index sampletable.idxclsid
+
+create unique clustered index idxcls_sid on sampletable(sampleid)
+drop index sampletable.idxcls_sid
+delete from sampletable
+
+drop index sampletable.idxcity
+create nonclustered index idxcity on sampletable(city)
+
+select * from sampletable where city ='Ahmedabad'
+
+--grouping/categorization of tuples in a table using group by clause
+select avg(salary) from tblemployee
+--department wise average salary
+
+select * from tblEmployee order by deptid
+select deptid as DepartmentNo,avg(salary) AverageSalary from tblemployee
+group by deptid
+--rules
+--group by can be applied to multiple columns
+--cannot group by an alias column
+--all columns in the select list other than the aggregates have to be included in the group by clause
+
+select Deptid,avg(salary) AverageSalary, sum(salary) TotalSalary  from tblemployee
+group by deptid
+
+--list dept wise maximum salary
+select deptid,salary from tblemployee order by deptid
+select deptid, max(salary) from tblemployee group by deptid
+
+--list the no.of male and female employees
+select gender,count(gender) from tblemployee
+group by gender
+order by gender desc
+
+--find all departments that have average salary > 12350
+select deptid,avg(salary) as Average from tblemployee
+where deptid is not null
+group by deptid
+having avg(salary)>12350
+order by Average desc
+
+--joins
+--Equi Join/Natural Join/Inner Join
+--Cross Join  - cartesian product
+--Self Join  - a table joining with itself
+--Outer Join
+     -- left outer
+	 -- right outer
+	 -- full outer
+	 select * from tblDepartment
+	 select * from tblEmployee
+--inner joins/equi
+select * from tblemployee, tblDepartment where tblEmployee.Deptid=tblDepartment.Deptid
+
+select * from tblemployee t1 inner join tblDepartment t2 on t1.Deptid=t2.deptid 
+--cross join
+select * from tblEmployee,tblDepartment
+
+select * from tblDepartment cross join tblEmployee
+
+--self Joins
+
+--list all employee names along with their managers
+select e1.ename as 'Employee Name', m1.Ename as 'Manager Name'
+from emp e1 inner join emp m1 on e1.mgr_id=m1.empno
+
+--left outer joins
+select * from tblEmployee left  join tblDepartment on tblemployee.Deptid=tblDepartment.Deptid
+
+select * from tblEmployee right outer join tblDepartment on tblemployee.Deptid=tblDepartment.Deptid
+
+select * from tblEmployee full join tblDepartment on tblemployee.Deptid=tblDepartment.Deptid
+
+--find all managers who have more than 2 employees reporting to them
+--method 1
+select mgr_id,count(empno) from emp group by mgr_id
+having count(empno)>2
+
+--method 2
+select mgr.ename 'Manager name',count(e.empno) 'No of Employees'
+from emp e left join emp mgr on e.mgr_id=mgr.empno
+group by e.mgr_id,mgr.ename
+having count(e.empno)>2
+
+--find deptname wise average salary of employees
+--no.of male and female employees in a dept(id or name)
+select gender,count(gender) from tblemployee where Deptid=3
+group by gender
+
+--All employees who earn more than kedar
+
+select salary from tblemployee where empname='Kedar'
+
+select * from tblEmployee where salary > 12400
+
+--subqueries
+select * from tblEmployee where salary >  -- main query
+                                   (select salary from tblemployee where empname='Kedar') -- inner query
+select * from tblEmployee where salary >any  --(12200,12500,12400)
+				          (select salary from tblemployee where deptid =2)
+
+select * from tblEmployee where salary >=all  --(12200,12500,12400)
+				          (select salary from tblemployee where deptid =2)
+
+select * from tblEmployee where salary in  --(12200,12500,12400)
+				          (select salary from tblemployee where deptid =2)
+
+--display the names, jobid,salary of all employees where the job is that of James/7900
+--and salary greater than that of 7369
+
+select ename,job,sal from emp
+where job = -- 'clerk' and sal > 950
+        (select job from emp where empno=7369)
+and sal >
+          (select sal from emp where empno=7900)
+
+--nested sub queries
+select ename,job,sal from emp
+where job = -- 'clerk' and sal > 950
+        (select job from emp where empno= 
+		                              (select empno from emp where ename='Smith'))
+
+--list all dept wise minimum salary which are greater than dept no =20
+select deptno,min(sal) from emp group by deptno
+having min(sal)> (select min(sal) from emp where deptno=50)
+order by deptno desc
+
+--find the list of employees who earn less than any Manager, 
+--but they should not be a Manager
+select * from emp
+update emp set job='MANAGER' where ename='Clark'
+select ename,job,sal from emp 
+where sal <any (select sal from emp where job like 'M%')
+and job <> 'Manager'

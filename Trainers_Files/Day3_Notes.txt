@@ -1,0 +1,45 @@
+Views : Are virtual tables where only the view definitions are stored as a part of the schema. They do not carry any data. Hence there is no need for space
+
+-All theoritically updatable views are not proactically updatabale.
+-We can perform DML operation on views with single base table, provided the column/s not included in the view can take either null/defaults
+
+Purpose of Views : Enhancing query operations with no need to write the queries agaian and again
+For Security Purpose
+
+Similarities between isnull() and coalesce()
+1. Both are used to evaluate expressions/columns/variables for null and provide
+  a default value as a replacement
+2. both return null if all value/s are null
+    (for coalesce to return null, we may have to pass a datatype without value
+       else it throws error)
+3. Both can work with all datatypes
+
+Differences 
+1. Coalesce is ANSI compatible and can be used in other SQL Platforms, where as
+  isnull() cannot
+2. isnull() can take only 2 inputs as against coalesce that can take many inputs
+
+Relational Algebra: Set Operators
+
+union/union all : 
+Intersect
+Except
+
+Combining one or more queries to produce a final resultset
+The resultset of both thequeries must have the same no,of columns
+The data types of columns in the top and the bottom queries have to be same
+The positions of the columns in the top and bottom queries must be same
+The final resultset can be sorted using order by 
+
+row_number()- just numbers the row in sequence over a 
+rank() - ranks all rows with or without partitions over a sorted column. It gives the same rank to similar data, but skips the next number(gap in numbering)
+dense_rank() - works exactly like rank(), but does not skip numbering
+
+Pivot : Used to generate multi dimensional report
+Is used to transfer the row-wise data into column wise 
+
+Unpivot : Is used to transfer column wise data into row-wise
+
+stdname            Maths      Science       English
+Meher  		85	       70             65
+
